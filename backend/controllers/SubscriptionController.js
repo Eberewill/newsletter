@@ -1,4 +1,3 @@
-import asyncHandler from "express-async-handler";
 import { validationResult } from "express-validator";
 import Subscription_emails from "../models/Subscription_emails.js";
 import createHash from "hash-generator";
