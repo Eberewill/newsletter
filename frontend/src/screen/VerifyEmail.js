@@ -23,10 +23,10 @@ const VerifyEmail = ({ history }) => {
     if (!ref) {
       history.push("/");
     }
-    verifyUserEmail(ref)
-      .then(window.location.replace("https://www.google.com"))
-      .catch((err) => alert(err));
-  }, []);
+    verifyUserEmail(ref).then(
+      window.location.replace("https://www.google.com")
+    );
+  }, [history]);
 
   return <div>{loading && <h3> Loading...</h3>}</div>;
 };
