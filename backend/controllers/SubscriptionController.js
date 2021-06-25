@@ -60,7 +60,7 @@ const subscribeUser = async (req, res) => {
     });
 
     //create a string url for email verification
-    const verifyUrl = `${req.protocol}://${req.get("host")}/verify?ref=${
+    const verifyUrl = `${req.protocol}://${req.get("host")}/verify/${
       storeTempData.ref
     }`;
 
