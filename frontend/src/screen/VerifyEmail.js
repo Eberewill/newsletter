@@ -4,11 +4,9 @@ import axios from "axios";
 const VerifyEmail = ({ history }) => {
   const [response, setResponse] = useState();
 
-  const verifyUserEmail = async (ref) => {
-    const { data } = await axios.post(`/api/v1/newslatter/verify/`, ref);
-    if (data) {
-      setResponse(data);
-    }
+  const verifyUserEmail = (ref, cb) => {
+    axios.post(`/api/v1/newslatter/verify/`, ref);
+    cb();
   };
 
   const ref = new URL(window.location.href).searchParams.get("ref");
@@ -17,9 +15,9 @@ const VerifyEmail = ({ history }) => {
     if (!ref) {
       history.push("/");
     }
-    verifyUserEmail(ref);
-
-    window.location.replace("https://www.google.com");
+    verifyUserEmail(ref, () => {
+      window.location.replace("https://www.google.com");
+    });
   }, []);
 
   return <div></div>;
