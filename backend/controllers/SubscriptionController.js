@@ -60,9 +60,7 @@ const subscribeUser = async (req, res) => {
     });
 
     //create a string url for email verification
-    const verifyUrl = `${req.protocol}://${req.get("host")}/verify?ref=${
-      storeTempData.ref
-    }`;
+    const verifyUrl = `https://news-letter-app-new.herokuapp.com/verify?ref=${storeTempData.ref}`;
 
     //send a message to the mail address
 
@@ -111,9 +109,10 @@ const vertifyEmail = async (req, res) => {
     const savedUser = Subscription_emails.create({
       email: verifiedEmail.email,
     });
-    // delete the ref from db
 
-    const deleteRef = await EmailRef.findOneAndDelete({ ref: hash });
+    // delete the ref from db
+    await EmailRef.findOneAndDelete({ ref: hash });
+
     //return success
     return res.status(200).json({ message: "Created", success: true });
   } catch (error) {

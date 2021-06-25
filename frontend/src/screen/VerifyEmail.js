@@ -18,9 +18,8 @@ const VerifyEmail = ({ history }) => {
       history.push("/");
     }
     verifyUserEmail(ref);
-    if (response) {
-      history.push("https://www.google.com/");
-    }
+
+    window.location.replace("https://www.google.com");
   }, []);
 
   return <div></div>;
