@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const VerifyEmail = ({ history }) => {
-  const [response, setResponse] = useState();
-
   const verifyUserEmail = (ref, cb) => {
     axios.post(`/api/v1/newslatter/verify/`, ref);
     cb();

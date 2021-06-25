@@ -13,6 +13,6 @@ router.post(
   subscribeUser
 );
 
-router.get("/verify", vertifyEmail);
+router.post("/verify", vertifyEmail);
 
 export default router;
