@@ -1,20 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const VerifyEmail = ({ history, match }) => {
+const VerifyEmail = ({ history }) => {
+  const [response, setResponse] = useState();
+
   const verifyUserEmail = async (ref) => {
-    const { data } = await axios.post(`/api/v1/newslatter/${ref}`);
-    if (data.status) {
-      history.push("https://www.google.com/");
+    const { data } = await axios.post(`/api/v1/newslatter/verify/`, ref);
+    if (data) {
+      setResponse(data);
     }
   };
 
+  const ref = new URL(window.location.href).searchParams.get("ref");
+
   useEffect(() => {
-    if (!match.param.ref) {
+    if (!ref) {
       history.push("/");
     }
-    verifyUserEmail(match.param.ref);
+    verifyUserEmail(ref);
+    if (response) {
+      history.push("https://www.google.com/");
+    }
   }, []);
+
   return <div></div>;
 };
 

@@ -11,7 +11,7 @@ const App = () => {
       <Container>
         <Route path="/" component={HomePage} exact />
 
-        <Route path="/verify/:ref" component={VerifyEmail} exact />
+        <Route path="/verify" component={VerifyEmail} exact />
       </Container>
     </Router>
   );

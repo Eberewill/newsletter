@@ -60,7 +60,7 @@ const subscribeUser = async (req, res) => {
     });
 
     //create a string url for email verification
-    const verifyUrl = `${req.protocol}://${req.get("host")}/verify/${
+    const verifyUrl = `${req.protocol}://${req.get("host")}/verify?ref=${
       storeTempData.ref
     }`;
 
@@ -92,7 +92,7 @@ const subscribeUser = async (req, res) => {
 const vertifyEmail = async (req, res) => {
   try {
     //get the request params
-    const hash = req.params.ref;
+    const hash = req.body.ref;
 
     if (!hash) {
       return res.status(404).json({ error: true });
@@ -103,7 +103,7 @@ const vertifyEmail = async (req, res) => {
     if (!verifiedEmail) {
       return res
         .status(404)
-        .json({ error: "invalid reference number", error: true });
+        .json({ message: "invalid reference number", error: true });
     }
 
     //save to the database
@@ -115,7 +115,7 @@ const vertifyEmail = async (req, res) => {
 
     const deleteRef = await EmailRef.findOneAndDelete({ ref: hash });
     //return success
-    return res.status(200).json({ success: "Created" + savedUser });
+    return res.status(200).json({ message: "Created", success: true });
   } catch (error) {
     console.log(error);
     res.status(500).json({ respone: false, message: error, error: true });
