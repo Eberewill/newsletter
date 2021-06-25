@@ -11,87 +11,115 @@ import sendmail from "../utils/sendMail.js";
  */
 
 const subscribeUser = async (req, res) => {
-  let errors = validationResult(req);
+  try {
+    let errors = validationResult(req);
 
-  //validate email with express validator
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      code: 0,
-      validation: errors.array(),
-      message: "Validation failed!",
-    });
-  }
-  //search database if email exist
+    //validate email with express validator
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        response: false,
+        message: "Validation failed!",
+        error: true,
+      });
+    }
 
-  const userExist = await Subscription_emails.findOne({
-    email: req.body.email,
-  });
-
-  if (userExist) {
-    const mailContent = {
-      message: "You are already a subscriber on or Mailing List",
-      subject: "Email subscription update",
+    //search database if email exist on subscription table
+    const userExist = await Subscription_emails.findOne({
       email: req.body.email,
+    });
+
+    if (userExist) {
+      const mailContent = {
+        message: "You are already a subscriber on or Mailing List",
+        email: req.body.email,
+      };
+      sendmail(mailContent)
+        .then(res.status(200).json({ response: true, message: "success" }))
+        .catch((mesage) => {
+          res.status(500).json({ message: mesage, error: true });
+        });
+    }
+
+    //check to see if the User have tried registring befor
+
+    const userHasRef = await EmailRef.findOne({
+      email: req.body.email,
+    });
+    if (userHasRef) {
+      res.status(200).json({
+        message: "You are one step to go, kindly verify your email",
+      });
+    }
+
+    //generte hash
+    const hash = createHash(100);
+
+    const storeTempData = await EmailRef.create({
+      ref: hash,
+      email: req.body.email,
+    });
+
+    //create a string url for email verification
+    const verifyUrl = `${req.protocol}://${req.get("host")}/verify?ref=${
+      storeTempData.ref
+    }`;
+
+    //send a message to the mail address
+
+    const messageObj = {
+      email: storeTempData.email,
+      message: `Hello plese kindly verify your mail by visiting ${verifyUrl}`,
     };
-    sendmail(mailContent);
+
+    sendmail(messageObj)
+      .then(res.status(200).json({ response: true, message: "success" }))
+      .catch((mesage) => {
+        res.status(500).json({ respone: false, message: mesage, error: true });
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ respone: false, message: error, error: true });
   }
-
-  //generte hash
-  let hash = createHash(100);
-
-  const storeData = await EmailRef.create({
-    ref: hash,
-    email: req.body.email,
-  });
-
-  //send user the url with there hash,
-
-  const verifyUrl = `${req.protocol}://${req.get("host")}/verifyEmail?hash=${
-    storeData.ref
-  }`;
-
-  //send a message to the mail address
-
-  const messageObj = {
-    email: storeData.email,
-    message: `Hello plese kindly verify your mail by vissiting ${verifyUrl}`,
-    subject: "Email Update",
-  };
-
-  sendmail(messageObj);
-
-  console.log(req.body.email);
-  res.status(200).json({ success: true });
 };
 
 /*
-@desc    Auth user & get token
-@ROUTE   POST /api/newsletter/
-@PARAM   {EMAIL}
+@desc    Verify ref Hash and add email to the subscriotion_email
+@ROUTE   POST /api/:ref
+@PARAM   {ref}
 @access  Public
  */
 
 const vertifyEmail = async (req, res) => {
-  //get the request params
-  const hash = req.body.hash;
+  try {
+    //get the request params
+    const hash = req.params.ref;
 
-  if (!hash) {
-    return res.status().json({ erro: "invalid" });
+    if (!hash) {
+      return res.status(404).json({ error: true });
+    }
+
+    const verifiedEmail = await EmailRef.findOne({ ref: hash });
+
+    if (!verifiedEmail) {
+      return res
+        .status(404)
+        .json({ error: "invalid reference number", error: true });
+    }
+
+    //save to the database
+
+    const savedUser = Subscription_emails.create({
+      email: verifiedEmail.email,
+    });
+    // delete the ref from db
+
+    const deleteRef = await EmailRef.findOneAndDelete({ ref: hash });
+    //return success
+    return res.status(200).json({ success: "Created" + savedUser });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ respone: false, message: error, error: true });
   }
-
-  const verifiedEmail = await EmailRef.findOne({ ref: hash });
-
-  if (!verifiedEmail) {
-    return res.status().json({ erro: "invalid" });
-  }
-  //save to the database
-
-  const savedUser = Subscription_emails.create({
-    email: verifiedEmail.email,
-  });
-  // delete the ref from db
-  //return success
-  return res.status(200).json({ success: "Created" + savedUser });
 };
 
 export { subscribeUser, vertifyEmail };

@@ -48,20 +48,18 @@ const HomePage = () => {
               Subscribe
             </Button>
           </Form>
-
-          <Row className="py-3">
-            <Alert variant="success">
-              Verification link sent to your Mailbox
-            </Alert>
-          </Row>
-
-          <Row className="py-3">
-            <Alert variant="danger">
-              {`There was an error while performing your request ${
-                apiData && apiData.message
-              }`}
-            </Alert>
-          </Row>
+          {apiData && apiData.error ? (
+            <Row className="py-3">
+              <Alert variant="danger">
+                {apiData && apiData.message} There was an error while performing
+                your request
+              </Alert>
+            </Row>
+          ) : (
+            <Row className="py-3">
+              <Alert variant="success">{apiData && apiData.message}</Alert>
+            </Row>
+          )}
         </Col>
       </Row>
     </Container>

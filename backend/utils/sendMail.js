@@ -1,25 +1,32 @@
-import nodemailer from "nodemailer";
+import axios from "axios";
 
-const sendmail = async (options) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    auth: {
-      user: process.env.SMTP_EMAIL,
-      pass: process.env.SMTP_PASSWORD,
-    },
+const sendmail = (messaggeObj) => {
+  return new Promise((resolve, reject) => {
+    let options = {
+      method: "POST",
+      url: "https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send",
+      headers: {
+        "content-type": "application/json",
+        "x-rapidapi-key": process.env.X_Rapidapi_Key,
+        "x-rapidapi-host": "rapidprod-sendgrid-v1.p.rapidapi.com",
+      },
+      data: {
+        personalizations: [
+          {
+            to: [{ email: messaggeObj.email }],
+            subject: "Newsletter Notification",
+          },
+        ],
+        from: { email: process.env.FROM_EMAIL },
+        content: [{ type: "text/plain", value: messaggeObj.message }],
+      },
+    };
+
+    axios
+      .request(options)
+      .then((response) => resolve(response))
+      .catch((err) => reject(err));
   });
-
-  const message = {
-    from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-  };
-
-  const info = await transporter.sendMail(message);
-
-  return "Message sent: %s", info.messageId;
 };
 
 export default sendmail;
